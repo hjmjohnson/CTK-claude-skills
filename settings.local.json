@@ -46,7 +46,8 @@
       "Bash(gh issue:*)",
       "Read(//opt/homebrew/Cellar/llvm/22.1.0/bin/**)",
       "Bash(/opt/homebrew/Cellar/llvm/22.1.0/bin/analyze-build --help)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(echo === PR $pr ===:*)"
     ]
   }
 }

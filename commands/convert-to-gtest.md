@@ -14,6 +14,20 @@ $ARGUMENTS
 
 If no directory is given, use the current working directory's `test/` subdirectory.
 
+## Core Philosophy: Mechanical Conversion Only
+
+> "One Commit One Change" — N-Dekker, ITK reviewer
+
+This conversion must be **strictly mechanical**. The GTest file should behave
+identically to the old test file. Do **not**:
+- Add new `EXPECT_*` assertions that have no corresponding check in the original
+- Remove existing comments (especially scope-explaining comments)
+- Add `[[maybe_unused]]` unless a variable is genuinely never read
+- Refactor, simplify, or restructure logic beyond what conversion requires
+- Add diagnostic output that was not in the original
+
+The reviewer standard: "Please just do Test-to-GoogleTest conversion."
+
 ## Step 1: Discover No-Argument Tests
 
 Read `CMakeLists.txt` in the target directory. Find tests that:
@@ -57,21 +71,60 @@ Work through candidates **one at a time**. For each `itkFooTest`:
 
 ### 2a. Read the Old Test File
 
-Read `itkFooTest.cxx` to understand what the test does.
+Read `itkFooTest.cxx` carefully. Understand **every** check, output statement,
+and comment — all of them must be preserved in the new file.
 
 ### 2b. Create `itkFooGTest.cxx`
 
 Create the new GTest file. Follow these conventions:
-- git mv `itkFooTest.cxx` `itkFooGTest.cxx`
+- `git mv itkFooTest.cxx itkFooGTest.cxx`
 - Include the primary header being tested first (if identifiable)
 - Use `#include "itkGTest.h"` (not `<gtest/gtest.h>`)
-- Use `ITK_GTEST_EXERCISE_BASIC_OBJECT_METHODS(ptr, ClassName, SuperclassName)` for ITK object boilerplate (requires a named variable, not an expression) in places where `ITK_EXERCISE_BASIC_OBJECT_METHODS` was previously used.
+- Use `ITK_GTEST_EXERCISE_BASIC_OBJECT_METHODS(ptr, ClassName, SuperclassName)` for ITK object boilerplate (requires a named variable, not an expression) in places where `ITK_EXERCISE_BASIC_OBJECT_METHODS` was previously used
 - Wrap helper functions in an anonymous `namespace { }`
-- Use `TEST(ClassName, DescriptiveName)` — group by class, use descriptive test names
-- Add real value assertions (`EXPECT_EQ`, `EXPECT_NEAR`, `EXPECT_TRUE`, `EXPECT_GT`, etc.) — don't just call functions and hope they don't crash
-- Preserve `std::cout` diagnostic output that was in the original
+- Preserve all `std::cout` diagnostic output from the original
+- Preserve all comments, especially scope-explaining comments
 - For legacy API tests: wrap in `#ifndef ITK_FUTURE_LEGACY_REMOVE` / `#endif`
-- Prefer to use `EXPECT_GT`, `EXPECT_LT`, `EXPECT_EQ`, and `EXPECT_NEQ` to `EXPECT_TRUE` or `EXPECT_FALSE` when working with comparisons that are not boolean variables.
+
+#### Test Name Convention
+
+Use `TEST(ClassName, ConvertedLegacyTest)` as the standard name for a converted
+test that has no finer logical subdivision:
+
+```cpp
+TEST(Foo, ConvertedLegacyTest)
+{
+  // converted body
+}
+```
+
+If the original test has multiple clearly distinct logical sections, split them
+into separate `TEST()` blocks with descriptive names — but only if those sections
+were already distinct in the original.
+
+#### Assertion Mapping
+
+Translate the original's output/return-code checks into GTest assertions using
+the **most specific** macro available:
+
+| Original pattern | GTest equivalent |
+|---|---|
+| `if (!condition) return EXIT_FAILURE` | `EXPECT_TRUE(condition)` |
+| `if (a != b) return EXIT_FAILURE` | `EXPECT_EQ(a, b)` |
+| `if (a == b) return EXIT_FAILURE` | `EXPECT_NE(a, b)` |
+| `if (a <= b) return EXIT_FAILURE` | `EXPECT_GT(a, b)` |
+| `if (a >= b) return EXIT_FAILURE` | `EXPECT_LT(a, b)` |
+| `if (ptr == nullptr) return EXIT_FAILURE` | `EXPECT_NE(ptr, nullptr)` |
+| `if (ptr != nullptr) return EXIT_FAILURE` | `EXPECT_EQ(ptr, nullptr)` |
+| try/catch expecting exception | `EXPECT_THROW(expr, ExceptionType)` or `ASSERT_THROW` |
+| comparing ITK array-like objects | `ITK_EXPECT_VECTOR_NEAR(val1, val2, rmsError)` |
+
+**Never use** `EXPECT_TRUE(a > b)` when `EXPECT_GT(a, b)` expresses the same
+thing. **Never use** `EXPECT_TRUE(ptr == nullptr)` — use `EXPECT_EQ(ptr, nullptr)`.
+
+Only add `EXPECT_*` assertions that correspond to a real check in the original
+test (explicit `if (...) return EXIT_FAILURE`, or a function whose documented
+contract is to throw on failure). Do not add assertions that were not present.
 
 Template structure:
 ```cpp
@@ -92,9 +145,9 @@ namespace
 // helper functions here
 } // namespace
 
-TEST(Foo, BasicFunctionality)
+TEST(Foo, ConvertedLegacyTest)
 {
-  // test body with EXPECT_* assertions
+  // test body with EXPECT_* assertions mirroring the original checks
 }
 ```
 
@@ -165,10 +218,12 @@ If a `*GTest.cxx` already exists (e.g., `itkArrayGTest.cxx`), **append** new `TE
 
 - **`ITK_GTEST_EXERCISE_BASIC_OBJECT_METHODS`** requires a named pointer variable in scope — not an inline `FooType::New()` expression
 - **Double braces** for aggregate-initialized ITK structs: `itk::Size<3> sz{ { 10, 10, 10 } };`
-- **`[[maybe_unused]]`** on variables that are only used in diagnostics/output
+- **`[[maybe_unused]]`** — only use when the variable is genuinely never read; do NOT add it to a variable used on the very next line
 - **`std::hash`** behavior is implementation-defined — never assert `hash(x) == x`
 - **Platform-specific assertions**: avoid assuming `std::hash<int>` is identity; avoid assuming specific numeric output values that differ across platforms
 - **Do not** add a `main()` function — GTest provides its own
 - **Do not** use `EXIT_SUCCESS`/`EXIT_FAILURE` returns — use `EXPECT_*`/`ASSERT_*`
-- **Do not** combine multiple ctest files into a single GTest.cxx file.
+- **Do not** combine multiple ctest files into a single GTest.cxx file
+- **Do not** remove scope-explaining comments (e.g., `// local scope to ensure ...`)
 - The old test driver called `itkFooTest(int argc, char* argv[])` as a function — the new file is standalone and should not define that signature
+- **Do not** add novel `EXPECT_NEAR` or numerical accuracy checks if the original test had no such check — this is out of scope for a conversion PR
