@@ -47,7 +47,16 @@
       "Read(//opt/homebrew/Cellar/llvm/22.1.0/bin/**)",
       "Bash(/opt/homebrew/Cellar/llvm/22.1.0/bin/analyze-build --help)",
       "Bash(xargs:*)",
-      "Bash(echo === PR $pr ===:*)"
+      "Bash(echo === PR $pr ===:*)",
+      "Bash(pre-commit run:*)",
+      "Bash(for f:*)",
+      "Read(//Users/johnsonhj/Dashboard/src/ITK/**)",
+      "Bash(done)",
+      "Bash(for branch:*)",
+      "Bash(git rebase:*)",
+      "Bash(git cherry-pick:*)",
+      "Skill(pre-check-pr)",
+      "Skill(convert-to-gtest)"
     ]
   }
 }
