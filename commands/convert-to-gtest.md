@@ -12,7 +12,7 @@ Process **one test at a time**, creating a separate git commit for each conversi
 
 $ARGUMENTS
 
-If no directory is given, use the current working directory's `test/` subdirectory.
+If no file is given, then all files in current working directory's `test/` subdirectory will be considered.
 
 ## Core Philosophy: Mechanical Conversion Only
 
@@ -20,7 +20,6 @@ If no directory is given, use the current working directory's `test/` subdirecto
 
 This conversion must be **strictly mechanical**. The GTest file should behave
 identically to the old test file. Do **not**:
-- Add new `EXPECT_*` assertions that have no corresponding check in the original
 - Remove existing comments (especially scope-explaining comments)
 - Add `[[maybe_unused]]` unless a variable is genuinely never read
 - Refactor, simplify, or restructure logic beyond what conversion requires
@@ -82,7 +81,7 @@ Create the new GTest file. Follow these conventions:
 - Use `#include "itkGTest.h"` (not `<gtest/gtest.h>`)
 - Use `ITK_GTEST_EXERCISE_BASIC_OBJECT_METHODS(ptr, ClassName, SuperclassName)` for ITK object boilerplate (requires a named variable, not an expression) in places where `ITK_EXERCISE_BASIC_OBJECT_METHODS` was previously used
 - Wrap helper functions in an anonymous `namespace { }`
-- Preserve all `std::cout` diagnostic output from the original
+- Preserve all `std::cout` diagnostic output from the original **only** if they contain functions that would otherwise not be called. Otherwise attempt to minimize the redundant console outputs on passing tests.
 - Preserve all comments, especially scope-explaining comments
 - For legacy API tests: wrap in `#ifndef ITK_FUTURE_LEGACY_REMOVE` / `#endif`
 
@@ -194,10 +193,10 @@ ENH: Convert itkFooTest to itkFooGTest
 ```
 
 Requirements enforced by hooks:
-- Subject line must start with `ENH:`, `BUG:`, `COMP:`, `DOC:`, `PERF:`, `STYLE:`, or `WIP:`
+- Subject line must start with `ENH: Convert`
 - Subject line must be ≤ 78 characters
-- Always run pre-commit run -a on the entire source tree before committing
-- The clang-format pre-commit hook **will reformat** staged C++ files; if the first commit attempt fails, re-stage the reformatted files and commit again
+- Always run pre-commit run -a on the entire source tree before staging changes and committing
+- The clang-format pre-commit hook **will reformat** staged C++ and CMakeLists.txt files; if the first commit attempt fails, re-stage the reformatted files and commit again
 
 ```bash
 git add Modules/Core/Common/test/itkFooGTest.cxx \
@@ -226,4 +225,3 @@ If a `*GTest.cxx` already exists (e.g., `itkArrayGTest.cxx`), **append** new `TE
 - **Do not** combine multiple ctest files into a single GTest.cxx file
 - **Do not** remove scope-explaining comments (e.g., `// local scope to ensure ...`)
 - The old test driver called `itkFooTest(int argc, char* argv[])` as a function — the new file is standalone and should not define that signature
-- **Do not** add novel `EXPECT_NEAR` or numerical accuracy checks if the original test had no such check — this is out of scope for a conversion PR
