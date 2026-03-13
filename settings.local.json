@@ -57,7 +57,16 @@
       "Bash(git cherry-pick:*)",
       "Skill(pre-check-pr)",
       "Skill(convert-to-gtest)",
-      "Bash(cd /Users/johnsonhj/Dashboard/src/ITK\ngit checkout convert-itkderivativeoperatortest-to-itkderivativeoperatorgtest 2>&1 | tail -1\ngit rebase --onto upstream/main 9bfc81b16c convert-itkderivativeoperatortest-to-itkderivativeoperatorgtest 2>&1 | tail -10)"
+      "Bash(cd /Users/johnsonhj/Dashboard/src/ITK\ngit checkout convert-itkderivativeoperatortest-to-itkderivativeoperatorgtest 2>&1 | tail -1\ngit rebase --onto upstream/main 9bfc81b16c convert-itkderivativeoperatortest-to-itkderivativeoperatorgtest 2>&1 | tail -10)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(cd /Users/johnsonhj/Dashboard/src/ITK/cmake-build-clangtidy-22 && analyze-build --cdb compile_commands.json --output /tmp/qe-scan -v --include Modules/Core/QuadEdgeMesh/include/itkQuadEdgeMeshLineCell.hxx 2>&1 | head -20)",
+      "Bash(which analyze-build:*)",
+      "Bash(ls /opt/homebrew/opt/llvm/bin/analyze-build 2>/dev/null && /opt/homebrew/opt/llvm/bin/analyze-build --help 2>&1 | head -5)",
+      "Read(//opt/homebrew/Cellar/llvm/**)",
+      "Read(//opt/homebrew/**)",
+      "Bash(/opt/homebrew/Cellar/llvm/22.1.0/bin/analyze-build --version 2>&1 || /opt/homebrew/Cellar/llvm/22.1.0/bin/clang --version 2>&1 | head -2)",
+      "Bash(/opt/homebrew/Cellar/llvm/22.1.0/bin/analyze-build \\\\\n  --cdb compile_commands.json \\\\\n  --sarif \\\\\n  --output /tmp/itk-scan-build-20260313 \\\\\n  --exclude /Users/johnsonhj/Dashboard/src/ITK/Modules/ThirdParty \\\\\n  --status-bugs \\\\\n  2>&1 | tail -20)"
     ]
   }
 }
