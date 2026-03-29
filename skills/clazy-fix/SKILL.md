@@ -31,7 +31,7 @@ If the user specifies a check name (e.g., `container-anti-pattern`), use that.
 If no check is specified, find the most recent clazy log and pick the highest-frequency fixable check:
 
 ```bash
-CLAZY_LOG="$(ls -t ~/src/CTK/cmake-build-clazy/CTK-build/clazy-*.log | head -1)"
+CLAZY_LOG="$(ls -t ~/src/CTK/cmake-build-clazy-qt6/CTK-build/clazy-*.log | head -1)"
 grep -oE '\[-Wclazy-[^]]+' "${CLAZY_LOG}" | sed 's/\[-Wclazy-//' | sort | uniq -c | sort -rn
 ```
 
@@ -64,7 +64,7 @@ Before making any changes, record the baseline so regressions can be detected:
 
 1. **Baseline build**: Run a clean build via the superbuild target (required so PythonQt wrappers regenerate correctly):
    ```bash
-   BLD_DIR=~/src/CTK/cmake-build-clazy/CTK-build
+   BLD_DIR=~/src/CTK/cmake-build-clazy-qt6/CTK-build
    BASELINE_BUILD_LOG="${BLD_DIR}/baseline-build-$(date +%Y%m%d-%H%M%S).log"
    cmake --build "${BLD_DIR}" --target clean 2>&1 > /dev/null
    cmake --build ~/src/CTK/cmake-build-clazy --target CTK -j8 2>&1 | tee "${BASELINE_BUILD_LOG}"
@@ -139,7 +139,7 @@ For each file with warnings:
 **MANDATORY** — every commit must build cleanly. Use the superbuild target:
 
 ```bash
-BLD_DIR=~/src/CTK/cmake-build-clazy/CTK-build
+BLD_DIR=~/src/CTK/cmake-build-clazy-qt6/CTK-build
 POST_BUILD_LOG="${BLD_DIR}/post-fix-build-$(date +%Y%m%d-%H%M%S).log"
 cmake --build "${BLD_DIR}" --target clean 2>&1 > /dev/null
 cmake --build ~/src/CTK/cmake-build-clazy --target CTK -j8 2>&1 | tee "${POST_BUILD_LOG}"
@@ -219,7 +219,7 @@ After committing:
 
 The report file lives at:
 ```
-~/src/CTK/cmake-build-clazy/CTK-build/clazy-fix-report.md
+~/src/CTK/cmake-build-clazy-qt6/CTK-build/clazy-fix-report.md
 ```
 
 If the file does not exist, create it with the header (see template below). If it already exists, append a new section for this fix.

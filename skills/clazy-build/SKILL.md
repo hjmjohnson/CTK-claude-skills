@@ -13,12 +13,12 @@ The superbuild must have completed at least once (via `/superbuild-ctk`) so that
 ## Build Architecture
 
 CTK uses a **two-level build**:
-- **Superbuild** (`~/src/CTK/cmake-build-clazy/`) — builds external dependencies (VTK, DCMTK, PythonQt, etc.) and then the CTK inner build as an ExternalProject
-- **Inner build** (`~/src/CTK/cmake-build-clazy/CTK-build/`) — builds CTK itself
+- **Superbuild** (`~/src/CTK/cmake-build-clazy-qt6/`) — builds external dependencies (VTK, DCMTK, PythonQt, etc.) and then the CTK inner build as an ExternalProject
+- **Inner build** (`~/src/CTK/cmake-build-clazy-qt6/CTK-build/`) — builds CTK itself
 
 For **incremental builds** (changed source files only), building the inner build directly is fine and fast:
 ```bash
-cmake --build ~/src/CTK/cmake-build-clazy/CTK-build -j8
+cmake --build ~/src/CTK/cmake-build-clazy-qt6/CTK-build -j8
 ```
 
 For **clean rebuilds** (after `--target clean`), always use the superbuild target:
@@ -38,7 +38,7 @@ cmake --build ~/src/CTK/cmake-build-clazy --target CTK -j8
 ### Step 2: Build and capture output
 
 ```bash
-BLD_DIR=~/src/CTK/cmake-build-clazy/CTK-build
+BLD_DIR=~/src/CTK/cmake-build-clazy-qt6/CTK-build
 BUILD_LOG="${BLD_DIR}/build-$(date +%Y%m%d-%H%M%S).log"
 ```
 

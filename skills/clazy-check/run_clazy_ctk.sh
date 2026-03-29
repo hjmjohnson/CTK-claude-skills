@@ -41,7 +41,7 @@ Positional:
 
 Options:
   -s, --src-dir DIR    CTK source directory       (default: ${DEFAULT_SRC_DIR})
-  -b, --bld-dir DIR    CTK inner build directory   (default: <src-dir>/cmake-build-clazy/CTK-build)
+  -b, --bld-dir DIR    CTK inner build directory   (default: <src-dir>/cmake-build-clazy-qt6/CTK-build)
   -j, --jobs N         Parallel clazy jobs         (default: $(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4))
   -a, --all            Force a fresh scan of all source files, ignoring
                        any previously narrowed file list.
@@ -111,7 +111,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 CLAZY_LEVEL="${CLAZY_LEVEL:-${DEFAULT_LEVEL}}"
-BLD_DIR="${BLD_DIR:-${SRC_DIR}/cmake-build-clazy/CTK-build}"
+BLD_DIR="${BLD_DIR:-${SRC_DIR}/cmake-build-clazy-qt6/CTK-build}"
 
 # ── derived paths ─────────────────────────────────────────────────────
 readonly COMPILE_COMMANDS="${BLD_DIR}/compile_commands.json"

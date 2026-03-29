@@ -7,18 +7,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 CTK (Common Toolkit) is a community-driven C++ toolkit supporting medical image analysis and surgical navigation. It is built on Qt (5 or 6) and provides DICOM support, visualization widgets, an OSGi-based plugin framework, Python scripting, and command-line module infrastructure.
 
 ## Build System
+Primary build directories are
+~/src/CTK/cmake-build-clazy-qt5 for Qt5 build
+~/src/CTK/cmake-build-clazy-qt6 for Qt6 build
 
 CMake-based superbuild. By default (`CTK_SUPERBUILD=ON`), external dependencies (DCMTK, etc.) are automatically downloaded and built.
 
+After making changes, verify that builds do not fail for ~/src/CTK/cmake-build-clazy-qt5/CTK-build and ~/src/CTK/cmake-build-clazy-qt6/CTK-build.
+
 **Typical configure + build:**
 ```bash
-cmake \
-  -DCTK_QT_VERSION:STRING=5 \
-  -DCTK_ENABLE_Widgets:BOOL=ON \
-  -DCTK_LIB_DICOM/Core:BOOL=ON \
-  -DCTK_LIB_DICOM/Widgets:BOOL=ON \
-  -B CTK-build -S .
-cmake --build CTK-build
+export CTK_QT_VERSION=5
+export CTK_QT_VERSION=6
+
+mkdir -p ~/src/CTK/cmake-build-clazy-qt${CTK_QT_VERSION} && cmake \
+     -DCTK_QT_VERSION:STRING=${CTK_QT_VERSION} \
+     -DQt${CTK_QT_VERSION}_DIR:PATH=/opt/homebrew/lib/cmake/Qt${CTK_QT_VERSION} \
+     -DCTK_ENABLE_Widgets:BOOL=ON \
+     -DCTK_LIB_DICOM/Core:BOOL=ON \
+     -DCTK_LIB_DICOM/Widgets:BOOL=ON \
+     -DCTK_LIB_Visualization/VTK/Core:BOOL=ON \
+     -DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON \
+     -DCTK_LIB_ImageProcessing/ITK/Core:BOOL=ON \
+     -DCTK_LIB_Scripting/Python/Core:BOOL=ON \
+     -DCTK_LIB_Scripting/Python/Widgets:BOOL=ON \
+     -DCTK_USE_QTTESTING:BOOL=ON \
+     -DCMAKE_C_COMPILER:FILEPATH=/opt/homebrew/opt/llvm/bin/clang \
+     -DCMAKE_CXX_COMPILER:FILEPATH=/opt/homebrew/opt/llvm/bin/clang++ \
+     -DCMAKE_OSX_SYSROOT:PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
+     -DBUILD_TESTING:BOOL=ON \
+     -B ~/src/CTK/cmake-build-clazy-qt${CTK_QT_VERSION} \
+     -S ~/src/CTK 2>&1 | tail -30
 ```
 
 Key CMake options:
@@ -159,3 +178,7 @@ ctest --test-dir CTK-build --timeout 30 --output-on-failure
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) builds on Ubuntu, tests both Qt 5 and Qt 6 configurations. A pre-commit configuration (`.pre-commit-config.yaml`) and commit-message lint workflow are also active.
+
+## TODO:
+- [ ] Could probably consider dropping VTK8 support here and even possibly early VTK9. Specifically in the context of 3D Slicer, latest preview for Slicer supports VTK 9.4+ (aka 9.6, 9.5, 9.4)
+

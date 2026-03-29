@@ -66,7 +66,7 @@ After clazy finishes, the script automatically:
 Parse the log file and report:
 
 ```bash
-CLAZY_LOG="$(ls -t ~/src/CTK/cmake-build-clazy/CTK-build/clazy-*.log | head -1)"
+CLAZY_LOG="$(ls -t ~/src/CTK/cmake-build-clazy-qt6/CTK-build/clazy-*.log | head -1)"
 
 # Total warnings
 grep -c 'warning:' "${CLAZY_LOG}"

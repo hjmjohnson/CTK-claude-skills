@@ -15,7 +15,7 @@ The CTK inner build must have completed successfully (via `/clazy-build`).
 ### Step 1: Run CTest
 
 ```bash
-BLD_DIR=~/src/CTK/cmake-build-clazy/CTK-build
+BLD_DIR=~/src/CTK/cmake-build-clazy-qt6/CTK-build
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 TEST_LOG="${BLD_DIR}/test-${TIMESTAMP}.log"
 JUNIT_XML="${BLD_DIR}/test-${TIMESTAMP}.xml"
